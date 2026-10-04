@@ -5,237 +5,222 @@
 
 
 /* =========================================================
-   MOBILE MENU
+   WAIT UNTIL HTML IS READY
 ========================================================= */
 
-const menuToggle =
-    document.getElementById("menuToggle");
-
-const mobileMenu =
-    document.getElementById("mobileMenu");
+document.addEventListener("DOMContentLoaded", () => {
 
 
-function closeMobileMenu() {
+    /* =====================================================
+       MOBILE MENU
+    ===================================================== */
 
-    if (!menuToggle || !mobileMenu) return;
+    const menuToggle =
+        document.getElementById("menuToggle");
 
-
-    mobileMenu.classList.remove("open");
-
-
-    menuToggle.setAttribute(
-        "aria-expanded",
-        "false"
-    );
+    const mobileMenu =
+        document.getElementById("mobileMenu");
 
 
-    menuToggle.setAttribute(
-        "aria-label",
-        "Open navigation menu"
-    );
+    function closeMobileMenu() {
+
+        if (!menuToggle || !mobileMenu) return;
 
 
-    mobileMenu.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-
-    menuToggle.innerHTML =
-        '<span aria-hidden="true">☰</span>';
-
-}
-
-
-if (menuToggle && mobileMenu) {
-
-    menuToggle.addEventListener("click", () => {
-
-        const isOpen =
-            mobileMenu.classList.toggle("open");
+        mobileMenu.classList.remove("open");
 
 
         menuToggle.setAttribute(
             "aria-expanded",
-            String(isOpen)
+            "false"
         );
 
 
         menuToggle.setAttribute(
             "aria-label",
-            isOpen
-                ? "Close navigation menu"
-                : "Open navigation menu"
+            "Open navigation menu"
         );
 
 
         mobileMenu.setAttribute(
             "aria-hidden",
-            String(!isOpen)
+            "true"
         );
 
 
         menuToggle.innerHTML =
-            isOpen
-                ? '<span aria-hidden="true">✕</span>'
-                : '<span aria-hidden="true">☰</span>';
+            '<span aria-hidden="true">☰</span>';
 
-    });
+    }
 
 
-    const mobileLinks =
-        mobileMenu.querySelectorAll("a");
+    if (menuToggle && mobileMenu) {
 
-
-    mobileLinks.forEach(link => {
-
-        link.addEventListener(
+        menuToggle.addEventListener(
             "click",
-            closeMobileMenu
+            () => {
+
+                const isOpen =
+                    mobileMenu.classList.toggle("open");
+
+
+                menuToggle.setAttribute(
+                    "aria-expanded",
+                    String(isOpen)
+                );
+
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    isOpen
+                        ? "Close navigation menu"
+                        : "Open navigation menu"
+                );
+
+
+                mobileMenu.setAttribute(
+                    "aria-hidden",
+                    String(!isOpen)
+                );
+
+
+                menuToggle.innerHTML =
+                    isOpen
+                        ? '<span aria-hidden="true">✕</span>'
+                        : '<span aria-hidden="true">☰</span>';
+
+            }
         );
 
-    });
+
+        const mobileLinks =
+            mobileMenu.querySelectorAll("a");
 
 
-    document.addEventListener(
-        "keydown",
-        event => {
+        mobileLinks.forEach(link => {
 
-            if (
-                event.key === "Escape" &&
-                mobileMenu.classList.contains("open")
-            ) {
+            link.addEventListener(
+                "click",
+                closeMobileMenu
+            );
 
-                closeMobileMenu();
+        });
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape" &&
+                    mobileMenu.classList.contains("open")
+                ) {
+
+                    closeMobileMenu();
+
+                }
 
             }
+        );
 
-        }
-    );
-
-}
+    }
 
 
-/* =========================================================
-   AUTOMATIC CAFÉ OPEN / CLOSED STATUS
-========================================================= */
+    /* =====================================================
+       AUTOMATIC CAFÉ OPEN / CLOSED STATUS
+       
+       LOCATION:
+       Hetauda, Nepal
 
-/*
+       TIMEZONE:
+       Asia/Kathmandu
 
-    C.A.F.E DE' CONTAINER
+       OPEN:
+       6:00 AM
 
-    EVERY DAY:
-    OPEN  = 6:00 AM
-    CLOSE = 10:00 PM
+       CLOSE:
+       10:00 PM
+    ===================================================== */
 
-    TIME ZONE:
-    Asia/Kathmandu
+    const CAFE_TIME_ZONE =
+        "Asia/Kathmandu";
 
-*/
+    const OPENING_HOUR = 6;
 
-
-function updateCafeStatus() {
-
-
-    /* -----------------------------------------------
-       ELEMENTS
-    ----------------------------------------------- */
-
-    const heroBox =
-        document.getElementById("heroStatusBox");
-
-    const heroText =
-        document.getElementById("heroStatus");
-
-    const heroNext =
-        document.getElementById("heroStatusNext");
+    const CLOSING_HOUR = 22;
 
 
-    const mainStatus =
-        document.getElementById("mainCafeStatus");
+    function getKathmanduTime() {
 
-    const mainStatusNext =
-        document.getElementById("mainStatusNext");
+        try {
 
-
-    const visitStatus =
-        document.getElementById("visitCafeStatus");
-
-    const visitStatusText =
-        document.getElementById("visitStatusText");
-
-    const visitStatusNext =
-        document.getElementById("visitStatusNext");
-
-
-    /* -----------------------------------------------
-       CURRENT NEPAL TIME
-    ----------------------------------------------- */
-
-    const now = new Date();
+            const formatter =
+                new Intl.DateTimeFormat(
+                    "en-US",
+                    {
+                        timeZone: CAFE_TIME_ZONE,
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hourCycle: "h23"
+                    }
+                );
 
 
-    const parts =
-        new Intl.DateTimeFormat(
-            "en-US",
-            {
-                timeZone: "Asia/Kathmandu",
-
-                hour: "2-digit",
-
-                minute: "2-digit",
-
-                hourCycle: "h23"
-            }
-        ).formatToParts(now);
+            const parts =
+                formatter.formatToParts(
+                    new Date()
+                );
 
 
-    const time = {};
+            let hour = 0;
+            let minute = 0;
 
 
-    parts.forEach(part => {
+            parts.forEach(part => {
 
-        if (part.type !== "literal") {
+                if (part.type === "hour") {
 
-            time[part.type] =
-                Number(part.value);
+                    hour =
+                        Number(part.value);
+
+                }
+
+
+                if (part.type === "minute") {
+
+                    minute =
+                        Number(part.value);
+
+                }
+
+            });
+
+
+            return {
+                hour,
+                minute
+            };
 
         }
 
-    });
+        catch (error) {
+
+            console.error(
+                "Could not read Kathmandu time:",
+                error
+            );
 
 
-    const currentMinutes =
-        (time.hour * 60) + time.minute;
+            return null;
 
+        }
 
-    /* -----------------------------------------------
-       CAFÉ HOURS
-    ----------------------------------------------- */
+    }
 
-    const openingMinutes =
-        6 * 60;
-
-    const closingMinutes =
-        22 * 60;
-
-
-    const isOpen =
-        currentMinutes >= openingMinutes &&
-        currentMinutes < closingMinutes;
-
-
-    const isBeforeOpening =
-        currentMinutes < openingMinutes;
-
-
-    /* -----------------------------------------------
-       STATUS CLASS HELPER
-    ----------------------------------------------- */
 
     function setStatusClass(
         element,
-        open
+        isOpen
     ) {
 
         if (!element) return;
@@ -243,37 +228,54 @@ function updateCafeStatus() {
 
         element.classList.toggle(
             "is-open",
-            open
+            isOpen
         );
 
 
         element.classList.toggle(
             "is-closed",
-            !open
+            !isOpen
         );
 
     }
 
 
-    /* =================================================
-       OPEN
-    ================================================= */
+    function setCafeStatus(
+        status,
+        nextText,
+        isOpen
+    ) {
 
-    if (isOpen) {
+        /* ---------------------------------------------
+           HERO
+        --------------------------------------------- */
 
+        const heroBox =
+            document.getElementById(
+                "heroStatusBox"
+            );
 
-        /* HERO */
+        const heroText =
+            document.getElementById(
+                "heroStatus"
+            );
+
+        const heroNext =
+            document.getElementById(
+                "heroStatusNext"
+            );
+
 
         setStatusClass(
             heroBox,
-            true
+            isOpen
         );
 
 
         if (heroText) {
 
             heroText.textContent =
-                "Open now";
+                status;
 
         }
 
@@ -281,18 +283,19 @@ function updateCafeStatus() {
         if (heroNext) {
 
             heroNext.textContent =
-                "Closes at 10:00 PM";
+                nextText;
 
         }
 
 
-        /* MAIN INFO */
+        /* ---------------------------------------------
+           MAIN INFO STRIP
+        --------------------------------------------- */
 
-        setStatusClass(
-            mainStatus,
-            true
-        );
-
+        const mainStatus =
+            document.getElementById(
+                "mainCafeStatus"
+            );
 
         const mainStatusText =
             mainStatus
@@ -302,101 +305,22 @@ function updateCafeStatus() {
                 : null;
 
 
-        if (mainStatusText) {
+        const mainStatusNext =
+            document.getElementById(
+                "mainStatusNext"
+            );
 
-            mainStatusText.textContent =
-                "Open now";
-
-        }
-
-
-        if (mainStatusNext) {
-
-            mainStatusNext.textContent =
-                "Closes at 10:00 PM";
-
-        }
-
-
-        /* VISIT */
-
-        setStatusClass(
-            visitStatus,
-            true
-        );
-
-
-        if (visitStatusText) {
-
-            visitStatusText.textContent =
-                "Open now";
-
-        }
-
-
-        if (visitStatusNext) {
-
-            visitStatusNext.textContent =
-                "Closes at 10:00 PM";
-
-        }
-
-    }
-
-
-    /* =================================================
-       CLOSED
-    ================================================= */
-
-    else {
-
-
-        /* HERO */
-
-        setStatusClass(
-            heroBox,
-            false
-        );
-
-
-        if (heroText) {
-
-            heroText.textContent =
-                "Closed now";
-
-        }
-
-
-        if (heroNext) {
-
-            heroNext.textContent =
-                isBeforeOpening
-                    ? "Opens at 6:00 AM"
-                    : "Opens tomorrow at 6:00 AM";
-
-        }
-
-
-        /* MAIN INFO */
 
         setStatusClass(
             mainStatus,
-            false
+            isOpen
         );
-
-
-        const mainStatusText =
-            mainStatus
-                ? mainStatus.querySelector(
-                    ".status-text"
-                )
-                : null;
 
 
         if (mainStatusText) {
 
             mainStatusText.textContent =
-                "Closed now";
+                status;
 
         }
 
@@ -404,25 +328,41 @@ function updateCafeStatus() {
         if (mainStatusNext) {
 
             mainStatusNext.textContent =
-                isBeforeOpening
-                    ? "Opens at 6:00 AM"
-                    : "Opens tomorrow at 6:00 AM";
+                nextText;
 
         }
 
 
-        /* VISIT */
+        /* ---------------------------------------------
+           VISIT SECTION
+        --------------------------------------------- */
+
+        const visitStatus =
+            document.getElementById(
+                "visitCafeStatus"
+            );
+
+        const visitStatusText =
+            document.getElementById(
+                "visitStatusText"
+            );
+
+        const visitStatusNext =
+            document.getElementById(
+                "visitStatusNext"
+            );
+
 
         setStatusClass(
             visitStatus,
-            false
+            isOpen
         );
 
 
         if (visitStatusText) {
 
             visitStatusText.textContent =
-                "Closed now";
+                status;
 
         }
 
@@ -430,431 +370,1000 @@ function updateCafeStatus() {
         if (visitStatusNext) {
 
             visitStatusNext.textContent =
-                isBeforeOpening
-                    ? "Opens at 6:00 AM"
-                    : "Opens tomorrow at 6:00 AM";
+                nextText;
 
         }
 
     }
 
-}
+
+    function updateCafeStatus() {
+
+        const time =
+            getKathmanduTime();
 
 
-/* =========================================================
-   RUN STATUS IMMEDIATELY
-========================================================= */
+        /* ---------------------------------------------
+           SAFETY FALLBACK
+           
+           If timezone detection fails, don't leave
+           the website stuck on "Checking..."
+        --------------------------------------------- */
 
-updateCafeStatus();
+        if (!time) {
 
-
-/* =========================================================
-   UPDATE EVERY 30 SECONDS
-========================================================= */
-
-setInterval(
-    updateCafeStatus,
-    30000
-);
-
-
-/* =========================================================
-   UPDATE WHEN USER RETURNS TO TAB
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    () => {
-
-        if (!document.hidden) {
-
-            updateCafeStatus();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   MENU FILTER
-========================================================= */
-
-const menuTabs =
-    document.querySelectorAll(
-        ".menu-tab"
-    );
-
-
-const menuCards =
-    document.querySelectorAll(
-        ".menu-card"
-    );
-
-
-menuTabs.forEach(tab => {
-
-    tab.addEventListener(
-        "click",
-        () => {
-
-            const category =
-                tab.getAttribute(
-                    "data-category"
-                );
-
-
-            /* -----------------------------------------
-               ACTIVE BUTTON
-            ----------------------------------------- */
-
-            menuTabs.forEach(item => {
-
-                item.classList.remove(
-                    "active"
-                );
-
-
-                item.setAttribute(
-                    "aria-pressed",
-                    "false"
-                );
-
-            });
-
-
-            tab.classList.add(
-                "active"
+            setCafeStatus(
+                "Open daily",
+                "6:00 AM — 10:00 PM",
+                true
             );
 
-
-            tab.setAttribute(
-                "aria-pressed",
-                "true"
-            );
-
-
-            /* -----------------------------------------
-               FILTER CARDS
-            ----------------------------------------- */
-
-            menuCards.forEach(card => {
-
-                const cardCategory =
-                    card.getAttribute(
-                        "data-category"
-                    );
-
-
-                const shouldShow =
-                    category === "all" ||
-                    category === cardCategory;
-
-
-                if (shouldShow) {
-
-                    card.classList.remove(
-                        "hidden"
-                    );
-
-
-                    card.removeAttribute(
-                        "aria-hidden"
-                    );
-
-                }
-
-                else {
-
-                    card.classList.add(
-                        "hidden"
-                    );
-
-
-                    card.setAttribute(
-                        "aria-hidden",
-                        "true"
-                    );
-
-                }
-
-            });
-
-        }
-    );
-
-});
-
-
-/* =========================================================
-   ACTIVE NAVIGATION
-========================================================= */
-
-const sections =
-    document.querySelectorAll(
-        "main section[id]"
-    );
-
-
-const navLinks =
-    document.querySelectorAll(
-        ".desktop-nav a"
-    );
-
-
-function updateActiveNavigation() {
-
-    if (!sections.length || !navLinks.length) {
-        return;
-    }
-
-
-    let currentSection =
-        "home";
-
-
-    const scrollPosition =
-        window.scrollY + 180;
-
-
-    sections.forEach(section => {
-
-        if (
-            scrollPosition >=
-            section.offsetTop
-        ) {
-
-            currentSection =
-                section.id;
+            return;
 
         }
 
-    });
+
+        const currentMinutes =
+            (
+                time.hour * 60
+            ) +
+            time.minute;
 
 
-    navLinks.forEach(link => {
-
-        const href =
-            link.getAttribute("href");
+        const openingMinutes =
+            OPENING_HOUR * 60;
 
 
-        const isActive =
-            href ===
-            `#${currentSection}`;
+        const closingMinutes =
+            CLOSING_HOUR * 60;
 
 
-        link.classList.toggle(
-            "active",
-            isActive
-        );
+        const isOpen =
+            currentMinutes >= openingMinutes &&
+            currentMinutes < closingMinutes;
 
 
-        if (isActive) {
+        const isBeforeOpening =
+            currentMinutes < openingMinutes;
 
-            link.setAttribute(
-                "aria-current",
-                "page"
+
+        if (isOpen) {
+
+            setCafeStatus(
+                "Open now",
+                "Closes at 10:00 PM",
+                true
             );
 
         }
 
         else {
 
-            link.removeAttribute(
-                "aria-current"
+            setCafeStatus(
+                "Closed now",
+                isBeforeOpening
+                    ? "Opens at 6:00 AM"
+                    : "Opens tomorrow at 6:00 AM",
+                false
             );
 
         }
 
+    }
+
+
+    /* Run immediately */
+
+    updateCafeStatus();
+
+
+    /* Refresh every 30 seconds */
+
+    setInterval(
+        updateCafeStatus,
+        30000
+    );
+
+
+    /* Refresh when the tab becomes visible */
+
+    document.addEventListener(
+        "visibilitychange",
+        () => {
+
+            if (
+                document.visibilityState ===
+                "visible"
+            ) {
+
+                updateCafeStatus();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       MENU FILTER
+    ===================================================== */
+
+    const menuTabs =
+        document.querySelectorAll(
+            ".menu-tab"
+        );
+
+
+    const menuCards =
+        document.querySelectorAll(
+            ".menu-card"
+        );
+
+
+    menuTabs.forEach(tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                const category =
+                    tab.getAttribute(
+                        "data-category"
+                    );
+
+
+                menuTabs.forEach(item => {
+
+                    item.classList.remove(
+                        "active"
+                    );
+
+
+                    item.setAttribute(
+                        "aria-pressed",
+                        "false"
+                    );
+
+                });
+
+
+                tab.classList.add(
+                    "active"
+                );
+
+
+                tab.setAttribute(
+                    "aria-pressed",
+                    "true"
+                );
+
+
+                menuCards.forEach(card => {
+
+                    const cardCategory =
+                        card.getAttribute(
+                            "data-category"
+                        );
+
+
+                    const shouldShow =
+                        category === "all" ||
+                        category === cardCategory;
+
+
+                    if (shouldShow) {
+
+                        card.classList.remove(
+                            "hidden"
+                        );
+
+
+                        card.removeAttribute(
+                            "aria-hidden"
+                        );
+
+                    }
+
+                    else {
+
+                        card.classList.add(
+                            "hidden"
+                        );
+
+
+                        card.setAttribute(
+                            "aria-hidden",
+                            "true"
+                        );
+
+                    }
+
+                });
+
+            }
+        );
+
     });
 
-}
+
+    /* =====================================================
+       PREMIUM GALLERY / LIGHTBOX
+    ===================================================== */
+
+    const galleryCards =
+        Array.from(
+            document.querySelectorAll(
+                ".gallery-card"
+            )
+        );
 
 
-window.addEventListener(
-    "scroll",
-    updateActiveNavigation,
-    { passive: true }
-);
+    const galleryLightbox =
+        document.getElementById(
+            "galleryLightbox"
+        );
 
 
-window.addEventListener(
-    "resize",
-    updateActiveNavigation
-);
+    const lightboxImage =
+        document.getElementById(
+            "lightboxImage"
+        );
 
 
-updateActiveNavigation();
+    const lightboxCaption =
+        document.getElementById(
+            "lightboxCaption"
+        );
 
 
-/* =========================================================
-   NAVBAR SHADOW
-========================================================= */
-
-const navbar =
-    document.getElementById(
-        "navbar"
-    );
+    const lightboxCounter =
+        document.getElementById(
+            "lightboxCounter"
+        );
 
 
-function updateNavbar() {
-
-    if (!navbar) return;
-
-
-    const isScrolled =
-        window.scrollY > 20;
+    const lightboxClose =
+        document.getElementById(
+            "lightboxClose"
+        );
 
 
-    navbar.classList.toggle(
-        "scrolled",
-        isScrolled
-    );
-
-}
+    const lightboxPrev =
+        document.getElementById(
+            "lightboxPrev"
+        );
 
 
-window.addEventListener(
-    "scroll",
-    updateNavbar,
-    { passive: true }
-);
+    const lightboxNext =
+        document.getElementById(
+            "lightboxNext"
+        );
 
 
-updateNavbar();
+    let currentGalleryIndex = 0;
 
 
-/* =========================================================
-   REVEAL ANIMATION
-========================================================= */
+    /* -----------------------------------------------------
+       GET GALLERY DATA
+    ----------------------------------------------------- */
 
-const revealElements =
-    document.querySelectorAll(
-        ".section, .info-strip, .menu-card, .final-cta"
-    );
+    const galleryItems =
+        galleryCards.map(card => {
 
+            return {
 
-if (
-    "IntersectionObserver"
-    in window
-) {
+                image:
+                    card.getAttribute(
+                        "data-gallery-image"
+                    ),
 
-    const revealObserver =
-        new IntersectionObserver(
+                title:
+                    card.getAttribute(
+                        "data-gallery-title"
+                    ) ||
+                    "C.A.F.E DE' CONTAINER",
 
-            entries => {
+                button:
+                    card
 
-                entries.forEach(
-                    entry => {
+            };
 
-                        if (
-                            entry.isIntersecting
-                        ) {
-
-                            entry.target.classList.add(
-                                "revealed"
-                            );
+        });
 
 
-                            revealObserver.unobserve(
-                                entry.target
-                            );
+    /* -----------------------------------------------------
+       UPDATE LIGHTBOX
+    ----------------------------------------------------- */
 
-                        }
+    function updateLightbox() {
+
+        if (
+            !galleryLightbox ||
+            !lightboxImage ||
+            !galleryItems.length
+        ) {
+
+            return;
+
+        }
+
+
+        const item =
+            galleryItems[
+                currentGalleryIndex
+            ];
+
+
+        lightboxImage.style.opacity =
+            "0";
+
+
+        const preloadedImage =
+            new Image();
+
+
+        preloadedImage.onload =
+            () => {
+
+                lightboxImage.src =
+                    item.image;
+
+
+                lightboxImage.alt =
+                    item.title;
+
+
+                if (lightboxCaption) {
+
+                    lightboxCaption.textContent =
+                        item.title;
+
+                }
+
+
+                if (lightboxCounter) {
+
+                    lightboxCounter.textContent =
+                        `${String(
+                            currentGalleryIndex + 1
+                        ).padStart(2, "0")} / ${String(
+                            galleryItems.length
+                        ).padStart(2, "0")}`;
+
+                }
+
+
+                requestAnimationFrame(
+                    () => {
+
+                        lightboxImage.style.opacity =
+                            "1";
 
                     }
                 );
 
-            },
+            };
 
-            {
-                threshold: 0.08
-            }
 
+        preloadedImage.onerror =
+            () => {
+
+                lightboxImage.src =
+                    item.image;
+
+
+                lightboxImage.alt =
+                    item.title;
+
+
+                if (lightboxCaption) {
+
+                    lightboxCaption.textContent =
+                        item.title;
+
+                }
+
+
+                if (lightboxCounter) {
+
+                    lightboxCounter.textContent =
+                        `${String(
+                            currentGalleryIndex + 1
+                        ).padStart(2, "0")} / ${String(
+                            galleryItems.length
+                        ).padStart(2, "0")}`;
+
+                }
+
+
+                lightboxImage.style.opacity =
+                    "1";
+
+            };
+
+
+        preloadedImage.src =
+            item.image;
+
+    }
+
+
+    /* -----------------------------------------------------
+       OPEN LIGHTBOX
+    ----------------------------------------------------- */
+
+    function openGallery(index) {
+
+        if (
+            !galleryLightbox ||
+            !galleryItems.length
+        ) {
+
+            return;
+
+        }
+
+
+        currentGalleryIndex =
+            index;
+
+
+        updateLightbox();
+
+
+        galleryLightbox.classList.add(
+            "open"
         );
 
 
-    revealElements.forEach(
-        element => {
-
-            element.classList.add(
-                "reveal"
-            );
+        galleryLightbox.setAttribute(
+            "aria-hidden",
+            "false"
+        );
 
 
-            revealObserver.observe(
-                element
+        document.body.classList.add(
+            "lightbox-open"
+        );
+
+
+        if (lightboxClose) {
+
+            lightboxClose.focus();
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       CLOSE LIGHTBOX
+    ----------------------------------------------------- */
+
+    function closeGallery() {
+
+        if (!galleryLightbox) return;
+
+
+        galleryLightbox.classList.remove(
+            "open"
+        );
+
+
+        galleryLightbox.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        document.body.classList.remove(
+            "lightbox-open"
+        );
+
+
+        if (lightboxImage) {
+
+            lightboxImage.style.opacity =
+                "0";
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       PREVIOUS IMAGE
+    ----------------------------------------------------- */
+
+    function showPreviousGalleryImage() {
+
+        if (!galleryItems.length) return;
+
+
+        currentGalleryIndex =
+            (
+                currentGalleryIndex -
+                1 +
+                galleryItems.length
+            ) %
+            galleryItems.length;
+
+
+        updateLightbox();
+
+    }
+
+
+    /* -----------------------------------------------------
+       NEXT IMAGE
+    ----------------------------------------------------- */
+
+    function showNextGalleryImage() {
+
+        if (!galleryItems.length) return;
+
+
+        currentGalleryIndex =
+            (
+                currentGalleryIndex +
+                1
+            ) %
+            galleryItems.length;
+
+
+        updateLightbox();
+
+    }
+
+
+    /* -----------------------------------------------------
+       GALLERY CARD EVENTS
+    ----------------------------------------------------- */
+
+    galleryCards.forEach(
+        (card, index) => {
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openGallery(index);
+
+                }
             );
 
         }
     );
 
-}
 
-else {
+    /* -----------------------------------------------------
+       LIGHTBOX CONTROLS
+    ----------------------------------------------------- */
 
-    revealElements.forEach(
-        element => {
+    if (lightboxClose) {
 
-            element.classList.add(
-                "revealed"
+        lightboxClose.addEventListener(
+            "click",
+            closeGallery
+        );
+
+    }
+
+
+    if (lightboxPrev) {
+
+        lightboxPrev.addEventListener(
+            "click",
+            showPreviousGalleryImage
+        );
+
+    }
+
+
+    if (lightboxNext) {
+
+        lightboxNext.addEventListener(
+            "click",
+            showNextGalleryImage
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       BACKDROP CLOSE
+    ----------------------------------------------------- */
+
+    if (galleryLightbox) {
+
+        const backdrop =
+            galleryLightbox.querySelector(
+                ".lightbox-backdrop"
             );
+
+
+        if (backdrop) {
+
+            backdrop.addEventListener(
+                "click",
+                closeGallery
+            );
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       KEYBOARD CONTROLS
+    ----------------------------------------------------- */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                !galleryLightbox ||
+                !galleryLightbox.classList.contains(
+                    "open"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            if (event.key === "Escape") {
+
+                closeGallery();
+
+            }
+
+
+            if (event.key === "ArrowLeft") {
+
+                showPreviousGalleryImage();
+
+            }
+
+
+            if (event.key === "ArrowRight") {
+
+                showNextGalleryImage();
+
+            }
 
         }
     );
 
-}
+
+    /* =====================================================
+       ACTIVE NAVIGATION
+    ===================================================== */
+
+    const sections =
+        document.querySelectorAll(
+            "main section[id]"
+        );
 
 
-/* =========================================================
-   CURRENT YEAR
-========================================================= */
-
-const currentYear =
-    document.getElementById(
-        "currentYear"
-    );
+    const navLinks =
+        document.querySelectorAll(
+            ".desktop-nav a"
+        );
 
 
-if (currentYear) {
+    function updateActiveNavigation() {
 
-    currentYear.textContent =
-        new Date().getFullYear();
+        if (
+            !sections.length ||
+            !navLinks.length
+        ) {
 
-}
-
-
-/* =========================================================
-   IMAGE ERROR HANDLING
-========================================================= */
-
-/*
-
-    If an image cannot load, we prevent the browser from
-    showing a broken-image icon.
-
-    This keeps the layout clean while you are still
-    replacing temporary images with the café's real photos.
-
-*/
-
-const images =
-    document.querySelectorAll(
-        "img"
-    );
-
-
-images.forEach(image => {
-
-    image.addEventListener(
-        "error",
-        () => {
-
-            image.classList.add(
-                "image-load-error"
-            );
+            return;
 
         }
+
+
+        let currentSection =
+            "home";
+
+
+        const scrollPosition =
+            window.scrollY + 180;
+
+
+        sections.forEach(section => {
+
+            if (
+                scrollPosition >=
+                section.offsetTop
+            ) {
+
+                currentSection =
+                    section.id;
+
+            }
+
+        });
+
+
+        navLinks.forEach(link => {
+
+            const href =
+                link.getAttribute("href");
+
+
+            const isActive =
+                href ===
+                `#${currentSection}`;
+
+
+            link.classList.toggle(
+                "active",
+                isActive
+            );
+
+
+            if (isActive) {
+
+                link.setAttribute(
+                    "aria-current",
+                    "page"
+                );
+
+            }
+
+            else {
+
+                link.removeAttribute(
+                    "aria-current"
+                );
+
+            }
+
+        });
+
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        updateActiveNavigation,
+        { passive: true }
     );
+
+
+    window.addEventListener(
+        "resize",
+        updateActiveNavigation
+    );
+
+
+    updateActiveNavigation();
+
+
+    /* =====================================================
+       NAVBAR SHADOW
+    ===================================================== */
+
+    const navbar =
+        document.getElementById(
+            "navbar"
+        );
+
+
+    function updateNavbar() {
+
+        if (!navbar) return;
+
+
+        const isScrolled =
+            window.scrollY > 20;
+
+
+        navbar.classList.toggle(
+            "scrolled",
+            isScrolled
+        );
+
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        updateNavbar,
+        { passive: true }
+    );
+
+
+    updateNavbar();
+
+
+    /* =====================================================
+       REVEAL ANIMATION
+    ===================================================== */
+
+    const revealElements =
+        document.querySelectorAll(
+            ".section, .info-strip, .menu-card, .final-cta"
+        );
+
+
+    if (
+        "IntersectionObserver" in window
+    ) {
+
+        const revealObserver =
+            new IntersectionObserver(
+
+                entries => {
+
+                    entries.forEach(
+                        entry => {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target.classList.add(
+                                    "revealed"
+                                );
+
+
+                                revealObserver.unobserve(
+                                    entry.target
+                                );
+
+                            }
+
+                        }
+                    );
+
+                },
+
+                {
+                    threshold: 0.08
+                }
+
+            );
+
+
+        revealElements.forEach(
+            element => {
+
+                element.classList.add(
+                    "reveal"
+                );
+
+
+                revealObserver.observe(
+                    element
+                );
+
+            }
+        );
+
+    }
+
+    else {
+
+        revealElements.forEach(
+            element => {
+
+                element.classList.add(
+                    "revealed"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       CURRENT YEAR
+    ===================================================== */
+
+    const currentYear =
+        document.getElementById(
+            "currentYear"
+        );
+
+
+    if (currentYear) {
+
+        currentYear.textContent =
+            new Date().getFullYear();
+
+    }
+
+
+    /* =====================================================
+       IMAGE ERROR HANDLING
+    ===================================================== */
+
+    const images =
+        document.querySelectorAll(
+            "img"
+        );
+
+
+    images.forEach(image => {
+
+        image.addEventListener(
+            "error",
+            () => {
+
+                image.classList.add(
+                    "image-load-error"
+                );
+
+            }
+        );
+
+    });
+
+
+    /* =====================================================
+       CAFÉ ATMOSPHERE VIDEO
+    ===================================================== */
+
+    const atmosphereVideo =
+        document.querySelector(
+            ".cafe-atmosphere-video"
+        );
+
+
+    if (atmosphereVideo) {
+
+        atmosphereVideo.muted = true;
+
+
+        const playVideo =
+            () => {
+
+                const playPromise =
+                    atmosphereVideo.play();
+
+
+                if (
+                    playPromise &&
+                    typeof playPromise.catch ===
+                    "function"
+                ) {
+
+                    playPromise.catch(
+                        () => {
+                            /* Autoplay may be blocked */
+                        }
+                    );
+
+                }
+
+            };
+
+
+        playVideo();
+
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (
+                    document.visibilityState ===
+                    "visible"
+                ) {
+
+                    playVideo();
+
+                }
+
+            }
+        );
+
+    }
 
 });
