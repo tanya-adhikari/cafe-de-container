@@ -1,19 +1,17 @@
-/* =========================================================
+/* =====================================================
    C.A.F.E DE' CONTAINER
    MAIN JAVASCRIPT
-========================================================= */
-
-
-/* =========================================================
-   WAIT UNTIL HTML IS READY
-========================================================= */
+===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
 
-    /* =====================================================
-       MOBILE MENU
-    ===================================================== */
+    /* =================================================
+       ELEMENTS
+    ================================================= */
+
+    const navbar =
+        document.getElementById("navbar");
 
     const menuToggle =
         document.getElementById("menuToggle");
@@ -21,37 +19,107 @@ document.addEventListener("DOMContentLoaded", () => {
     const mobileMenu =
         document.getElementById("mobileMenu");
 
+    const currentYear =
+        document.getElementById("currentYear");
 
-    function closeMobileMenu() {
 
-        if (!menuToggle || !mobileMenu) return;
+    /* =================================================
+       CURRENT YEAR
+    ================================================= */
 
+    if (currentYear) {
+        currentYear.textContent =
+            new Date().getFullYear();
+    }
+
+
+    /* =================================================
+       NAVBAR SCROLL EFFECT
+    ================================================= */
+
+    const handleNavbarScroll = () => {
+
+        if (!navbar) return;
+
+        if (window.scrollY > 20) {
+            navbar.classList.add("scrolled");
+        } else {
+            navbar.classList.remove("scrolled");
+        }
+
+    };
+
+    handleNavbarScroll();
+
+    window.addEventListener(
+        "scroll",
+        handleNavbarScroll,
+        { passive: true }
+    );
+
+
+    /* =================================================
+       MOBILE MENU
+    ================================================= */
+
+    const closeMobileMenu = () => {
+
+        if (!menuToggle || !mobileMenu) {
+            return;
+        }
 
         mobileMenu.classList.remove("open");
-
-
-        menuToggle.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-
-
-        menuToggle.setAttribute(
-            "aria-label",
-            "Open navigation menu"
-        );
-
 
         mobileMenu.setAttribute(
             "aria-hidden",
             "true"
         );
 
+        menuToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
 
-        menuToggle.innerHTML =
-            '<span aria-hidden="true">☰</span>';
+        menuToggle.setAttribute(
+            "aria-label",
+            "Open navigation menu"
+        );
 
-    }
+        document.body.classList.remove(
+            "mobile-menu-open"
+        );
+
+    };
+
+
+    const openMobileMenu = () => {
+
+        if (!menuToggle || !mobileMenu) {
+            return;
+        }
+
+        mobileMenu.classList.add("open");
+
+        mobileMenu.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        menuToggle.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+        menuToggle.setAttribute(
+            "aria-label",
+            "Close navigation menu"
+        );
+
+        document.body.classList.add(
+            "mobile-menu-open"
+        );
+
+    };
 
 
     if (menuToggle && mobileMenu) {
@@ -61,236 +129,382 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
 
                 const isOpen =
-                    mobileMenu.classList.toggle("open");
+                    mobileMenu.classList.contains("open");
 
-
-                menuToggle.setAttribute(
-                    "aria-expanded",
-                    String(isOpen)
-                );
-
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    isOpen
-                        ? "Close navigation menu"
-                        : "Open navigation menu"
-                );
-
-
-                mobileMenu.setAttribute(
-                    "aria-hidden",
-                    String(!isOpen)
-                );
-
-
-                menuToggle.innerHTML =
-                    isOpen
-                        ? '<span aria-hidden="true">✕</span>'
-                        : '<span aria-hidden="true">☰</span>';
+                if (isOpen) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
 
             }
         );
 
 
-        const mobileLinks =
-            mobileMenu.querySelectorAll("a");
+        mobileMenu
+            .querySelectorAll("a")
+            .forEach(link => {
+
+                link.addEventListener(
+                    "click",
+                    closeMobileMenu
+                );
+
+            });
+
+    }
 
 
-        mobileLinks.forEach(link => {
+    /* =================================================
+       ESCAPE KEY
+    ================================================= */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Escape") {
+
+                closeMobileMenu();
+
+            }
+
+        }
+    );
+
+
+    /* =================================================
+       SMOOTH ANCHOR LINKS
+    ================================================= */
+
+    document
+        .querySelectorAll('a[href^="#"]')
+        .forEach(link => {
 
             link.addEventListener(
                 "click",
-                closeMobileMenu
+                event => {
+
+                    const targetId =
+                        link.getAttribute("href");
+
+                    if (
+                        !targetId ||
+                        targetId === "#"
+                    ) {
+                        return;
+                    }
+
+                    const target =
+                        document.querySelector(targetId);
+
+                    if (!target) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+
+                }
             );
 
         });
 
 
-        document.addEventListener(
-            "keydown",
-            event => {
+    /* =================================================
+       ACTIVE NAVIGATION
+    ================================================= */
 
-                if (
-                    event.key === "Escape" &&
-                    mobileMenu.classList.contains("open")
-                ) {
+    const sections =
+        document.querySelectorAll(
+            "main section[id]"
+        );
 
-                    closeMobileMenu();
+    const navLinks =
+        document.querySelectorAll(
+            ".desktop-nav a"
+        );
 
-                }
+
+    const updateActiveNav = () => {
+
+        if (!sections.length) return;
+
+        const scrollPosition =
+            window.scrollY + 140;
+
+        let currentSection = "home";
+
+        sections.forEach(section => {
+
+            if (
+                scrollPosition >=
+                section.offsetTop
+            ) {
+
+                currentSection =
+                    section.id;
+
+            }
+
+        });
+
+        navLinks.forEach(link => {
+
+            link.classList.remove("active");
+
+            const href =
+                link.getAttribute("href");
+
+            if (
+                href ===
+                `#${currentSection}`
+            ) {
+
+                link.classList.add("active");
+
+            }
+
+        });
+
+    };
+
+    updateActiveNav();
+
+    window.addEventListener(
+        "scroll",
+        updateActiveNav,
+        { passive: true }
+    );
+
+
+    /* =================================================
+       MENU FILTER
+    ================================================= */
+
+    const menuTabs =
+        document.querySelectorAll(
+            ".menu-tab"
+        );
+
+    const menuCards =
+        document.querySelectorAll(
+            ".menu-card"
+        );
+
+
+    menuTabs.forEach(tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                const category =
+                    tab.dataset.category;
+
+                menuTabs.forEach(item => {
+                    item.classList.remove(
+                        "active"
+                    );
+                });
+
+                tab.classList.add("active");
+
+
+                menuCards.forEach(card => {
+
+                    const cardCategory =
+                        card.dataset.category;
+
+                    if (
+                        category === "all" ||
+                        cardCategory === category
+                    ) {
+
+                        card.classList.remove(
+                            "hidden"
+                        );
+
+                    } else {
+
+                        card.classList.add(
+                            "hidden"
+                        );
+
+                    }
+
+                });
 
             }
         );
 
-    }
+    });
 
 
-    /* =====================================================
-       AUTOMATIC CAFÉ OPEN / CLOSED STATUS
-       
-       LOCATION:
-       Hetauda, Nepal
+    /* =================================================
+       OPENING HOURS
+       HETAUDA / NEPAL
+       06:00 — 22:00
+    ================================================= */
 
-       TIMEZONE:
-       Asia/Kathmandu
+    const OPEN_HOUR = 6;
+    const CLOSE_HOUR = 22;
 
-       OPEN:
-       6:00 AM
-
-       CLOSE:
-       10:00 PM
-    ===================================================== */
-
-    const CAFE_TIME_ZONE =
+    const timeZone =
         "Asia/Kathmandu";
 
-    const OPENING_HOUR = 6;
 
-    const CLOSING_HOUR = 22;
+    const getKathmanduParts = () => {
 
-
-    function getKathmanduTime() {
-
-        try {
-
-            const formatter =
-                new Intl.DateTimeFormat(
-                    "en-US",
-                    {
-                        timeZone: CAFE_TIME_ZONE,
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hourCycle: "h23"
-                    }
-                );
-
-
-            const parts =
-                formatter.formatToParts(
-                    new Date()
-                );
-
-
-            let hour = 0;
-            let minute = 0;
-
-
-            parts.forEach(part => {
-
-                if (part.type === "hour") {
-
-                    hour =
-                        Number(part.value);
-
+        const formatter =
+            new Intl.DateTimeFormat(
+                "en-US",
+                {
+                    timeZone,
+                    weekday: "long",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: false
                 }
+            );
+
+        const parts =
+            formatter.formatToParts(
+                new Date()
+            );
+
+        const result = {};
+
+        parts.forEach(part => {
+            result[part.type] =
+                part.value;
+        });
+
+        return {
+            weekday: result.weekday,
+            hour: Number(result.hour),
+            minute: Number(result.minute)
+        };
+
+    };
 
 
-                if (part.type === "minute") {
+    const getOpeningStatus = () => {
 
-                    minute =
-                        Number(part.value);
+        const now =
+            getKathmanduParts();
 
-                }
+        const currentMinutes =
+            now.hour * 60 +
+            now.minute;
 
-            });
+        const openingMinutes =
+            OPEN_HOUR * 60;
 
+        const closingMinutes =
+            CLOSE_HOUR * 60;
+
+
+        if (
+            currentMinutes >= openingMinutes &&
+            currentMinutes < closingMinutes
+        ) {
 
             return {
-                hour,
-                minute
+                open: true,
+                label: "Open now",
+                next: "Closes at 10:00 PM"
             };
 
         }
 
-        catch (error) {
 
-            console.error(
-                "Could not read Kathmandu time:",
-                error
-            );
+        if (
+            currentMinutes < openingMinutes
+        ) {
 
-
-            return null;
+            return {
+                open: false,
+                label: "Closed",
+                next: "Opens at 6:00 AM"
+            };
 
         }
 
-    }
+
+        return {
+            open: false,
+            label: "Closed",
+            next: "Opens tomorrow at 6:00 AM"
+        };
+
+    };
 
 
-    function setStatusClass(
-        element,
-        isOpen
-    ) {
+    /* =================================================
+       UPDATE STATUS
+    ================================================= */
 
-        if (!element) return;
+    const updateOpeningStatus = () => {
 
-
-        element.classList.toggle(
-            "is-open",
-            isOpen
-        );
+        const status =
+            getOpeningStatus();
 
 
-        element.classList.toggle(
-            "is-closed",
-            !isOpen
-        );
+        /* HERO */
 
-    }
-
-
-    function setCafeStatus(
-        status,
-        nextText,
-        isOpen
-    ) {
-
-        /* ---------------------------------------------
-           HERO
-        --------------------------------------------- */
-
-        const heroBox =
-            document.getElementById(
-                "heroStatusBox"
-            );
-
-        const heroText =
+        const heroStatus =
             document.getElementById(
                 "heroStatus"
             );
 
-        const heroNext =
+        const heroStatusText =
+            document.getElementById(
+                "heroStatusText"
+            );
+
+        const heroStatusNext =
             document.getElementById(
                 "heroStatusNext"
             );
 
 
-        setStatusClass(
-            heroBox,
-            isOpen
-        );
+        if (heroStatus) {
 
+            heroStatus.classList.toggle(
+                "is-open",
+                status.open
+            );
 
-        if (heroText) {
-
-            heroText.textContent =
-                status;
-
-        }
-
-
-        if (heroNext) {
-
-            heroNext.textContent =
-                nextText;
+            heroStatus.classList.toggle(
+                "is-closed",
+                !status.open
+            );
 
         }
 
 
-        /* ---------------------------------------------
-           MAIN INFO STRIP
-        --------------------------------------------- */
+        if (heroStatusText) {
+
+            heroStatusText.textContent =
+                status.label;
+
+        }
+
+
+        if (heroStatusNext) {
+
+            heroStatusNext.textContent =
+                status.next;
+
+        }
+
+
+        /* MAIN INFO */
 
         const mainStatus =
             document.getElementById(
@@ -304,38 +518,44 @@ document.addEventListener("DOMContentLoaded", () => {
                 )
                 : null;
 
-
-        const mainStatusNext =
+        const mainNext =
             document.getElementById(
-                "mainStatusNext"
+                "mainCafeNext"
             );
 
 
-        setStatusClass(
-            mainStatus,
-            isOpen
-        );
+        if (mainStatus) {
+
+            mainStatus.classList.toggle(
+                "is-open",
+                status.open
+            );
+
+            mainStatus.classList.toggle(
+                "is-closed",
+                !status.open
+            );
+
+        }
 
 
         if (mainStatusText) {
 
             mainStatusText.textContent =
-                status;
+                status.label;
 
         }
 
 
-        if (mainStatusNext) {
+        if (mainNext) {
 
-            mainStatusNext.textContent =
-                nextText;
+            mainNext.textContent =
+                status.next;
 
         }
 
 
-        /* ---------------------------------------------
-           VISIT SECTION
-        --------------------------------------------- */
+        /* VISIT */
 
         const visitStatus =
             document.getElementById(
@@ -353,16 +573,25 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        setStatusClass(
-            visitStatus,
-            isOpen
-        );
+        if (visitStatus) {
+
+            visitStatus.classList.toggle(
+                "is-open",
+                status.open
+            );
+
+            visitStatus.classList.toggle(
+                "is-closed",
+                !status.open
+            );
+
+        }
 
 
         if (visitStatusText) {
 
             visitStatusText.textContent =
-                status;
+                status.label;
 
         }
 
@@ -370,102 +599,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (visitStatusNext) {
 
             visitStatusNext.textContent =
-                nextText;
+                status.next;
 
         }
 
-    }
+    };
 
 
-    function updateCafeStatus() {
-
-        const time =
-            getKathmanduTime();
-
-
-        /* ---------------------------------------------
-           SAFETY FALLBACK
-           
-           If timezone detection fails, don't leave
-           the website stuck on "Checking..."
-        --------------------------------------------- */
-
-        if (!time) {
-
-            setCafeStatus(
-                "Open daily",
-                "6:00 AM — 10:00 PM",
-                true
-            );
-
-            return;
-
-        }
-
-
-        const currentMinutes =
-            (
-                time.hour * 60
-            ) +
-            time.minute;
-
-
-        const openingMinutes =
-            OPENING_HOUR * 60;
-
-
-        const closingMinutes =
-            CLOSING_HOUR * 60;
-
-
-        const isOpen =
-            currentMinutes >= openingMinutes &&
-            currentMinutes < closingMinutes;
-
-
-        const isBeforeOpening =
-            currentMinutes < openingMinutes;
-
-
-        if (isOpen) {
-
-            setCafeStatus(
-                "Open now",
-                "Closes at 10:00 PM",
-                true
-            );
-
-        }
-
-        else {
-
-            setCafeStatus(
-                "Closed now",
-                isBeforeOpening
-                    ? "Opens at 6:00 AM"
-                    : "Opens tomorrow at 6:00 AM",
-                false
-            );
-
-        }
-
-    }
-
-
-    /* Run immediately */
-
-    updateCafeStatus();
+    updateOpeningStatus();
 
 
     /* Refresh every 30 seconds */
 
     setInterval(
-        updateCafeStatus,
+        updateOpeningStatus,
         30000
     );
 
 
-    /* Refresh when the tab becomes visible */
+    /* Refresh when returning to tab */
 
     document.addEventListener(
         "visibilitychange",
@@ -476,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "visible"
             ) {
 
-                updateCafeStatus();
+                updateOpeningStatus();
 
             }
 
@@ -484,209 +636,100 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    /* =====================================================
-       MENU FILTER
-    ===================================================== */
-
-    const menuTabs =
-        document.querySelectorAll(
-            ".menu-tab"
-        );
-
-
-    const menuCards =
-        document.querySelectorAll(
-            ".menu-card"
-        );
-
-
-    menuTabs.forEach(tab => {
-
-        tab.addEventListener(
-            "click",
-            () => {
-
-                const category =
-                    tab.getAttribute(
-                        "data-category"
-                    );
-
-
-                menuTabs.forEach(item => {
-
-                    item.classList.remove(
-                        "active"
-                    );
-
-
-                    item.setAttribute(
-                        "aria-pressed",
-                        "false"
-                    );
-
-                });
-
-
-                tab.classList.add(
-                    "active"
-                );
-
-
-                tab.setAttribute(
-                    "aria-pressed",
-                    "true"
-                );
-
-
-                menuCards.forEach(card => {
-
-                    const cardCategory =
-                        card.getAttribute(
-                            "data-category"
-                        );
-
-
-                    const shouldShow =
-                        category === "all" ||
-                        category === cardCategory;
-
-
-                    if (shouldShow) {
-
-                        card.classList.remove(
-                            "hidden"
-                        );
-
-
-                        card.removeAttribute(
-                            "aria-hidden"
-                        );
-
-                    }
-
-                    else {
-
-                        card.classList.add(
-                            "hidden"
-                        );
-
-
-                        card.setAttribute(
-                            "aria-hidden",
-                            "true"
-                        );
-
-                    }
-
-                });
-
-            }
-        );
-
-    });
-
-
-    /* =====================================================
-       PREMIUM GALLERY / LIGHTBOX
-    ===================================================== */
+    /* =================================================
+       GALLERY
+    ================================================= */
 
     const galleryCards =
-        Array.from(
-            document.querySelectorAll(
-                ".gallery-card"
-            )
+        document.querySelectorAll(
+            ".gallery-card"
         );
 
-
-    const galleryLightbox =
+    const lightbox =
         document.getElementById(
             "galleryLightbox"
         );
-
 
     const lightboxImage =
         document.getElementById(
             "lightboxImage"
         );
 
-
-    const lightboxCaption =
+    const lightboxTitle =
         document.getElementById(
-            "lightboxCaption"
+            "lightboxTitle"
         );
 
-
-    const lightboxCounter =
+    const lightboxDescription =
         document.getElementById(
-            "lightboxCounter"
+            "lightboxDescription"
         );
 
+    const lightboxNumber =
+        document.getElementById(
+            "lightboxNumber"
+        );
 
     const lightboxClose =
         document.getElementById(
             "lightboxClose"
         );
 
-
     const lightboxPrev =
         document.getElementById(
             "lightboxPrev"
         );
-
 
     const lightboxNext =
         document.getElementById(
             "lightboxNext"
         );
 
+    const lightboxBackdrop =
+        document.querySelector(
+            ".lightbox-backdrop"
+        );
+
+
+    const galleryItems =
+        Array.from(galleryCards)
+            .map(card => {
+
+                const image =
+                    card.querySelector("img");
+
+                return {
+                    src: image
+                        ? image.getAttribute("src")
+                        : "",
+
+                    alt: image
+                        ? image.getAttribute("alt")
+                        : "",
+
+                    title:
+                        card.dataset.title ||
+                        "C.A.F.E DE' CONTAINER",
+
+                    description:
+                        card.dataset.description ||
+                        ""
+                };
+
+            });
+
 
     let currentGalleryIndex = 0;
 
 
-    /* -----------------------------------------------------
-       GET GALLERY DATA
-    ----------------------------------------------------- */
-
-    const galleryItems =
-        galleryCards.map(card => {
-
-            return {
-
-                image:
-                    card.getAttribute(
-                        "data-gallery-image"
-                    ),
-
-                title:
-                    card.getAttribute(
-                        "data-gallery-title"
-                    ) ||
-                    "C.A.F.E DE' CONTAINER",
-
-                button:
-                    card
-
-            };
-
-        });
-
-
-    /* -----------------------------------------------------
-       UPDATE LIGHTBOX
-    ----------------------------------------------------- */
-
-    function updateLightbox() {
+    const updateLightbox = () => {
 
         if (
-            !galleryLightbox ||
-            !lightboxImage ||
-            !galleryItems.length
+            !galleryItems.length ||
+            !lightboxImage
         ) {
-
             return;
-
         }
-
 
         const item =
             galleryItems[
@@ -694,191 +737,89 @@ document.addEventListener("DOMContentLoaded", () => {
             ];
 
 
-        lightboxImage.style.opacity =
-            "0";
+        lightboxImage.src =
+            item.src;
+
+        lightboxImage.alt =
+            item.alt;
 
 
-        const preloadedImage =
-            new Image();
+        if (lightboxTitle) {
 
-
-        preloadedImage.onload =
-            () => {
-
-                lightboxImage.src =
-                    item.image;
-
-
-                lightboxImage.alt =
-                    item.title;
-
-
-                if (lightboxCaption) {
-
-                    lightboxCaption.textContent =
-                        item.title;
-
-                }
-
-
-                if (lightboxCounter) {
-
-                    lightboxCounter.textContent =
-                        `${String(
-                            currentGalleryIndex + 1
-                        ).padStart(2, "0")} / ${String(
-                            galleryItems.length
-                        ).padStart(2, "0")}`;
-
-                }
-
-
-                requestAnimationFrame(
-                    () => {
-
-                        lightboxImage.style.opacity =
-                            "1";
-
-                    }
-                );
-
-            };
-
-
-        preloadedImage.onerror =
-            () => {
-
-                lightboxImage.src =
-                    item.image;
-
-
-                lightboxImage.alt =
-                    item.title;
-
-
-                if (lightboxCaption) {
-
-                    lightboxCaption.textContent =
-                        item.title;
-
-                }
-
-
-                if (lightboxCounter) {
-
-                    lightboxCounter.textContent =
-                        `${String(
-                            currentGalleryIndex + 1
-                        ).padStart(2, "0")} / ${String(
-                            galleryItems.length
-                        ).padStart(2, "0")}`;
-
-                }
-
-
-                lightboxImage.style.opacity =
-                    "1";
-
-            };
-
-
-        preloadedImage.src =
-            item.image;
-
-    }
-
-
-    /* -----------------------------------------------------
-       OPEN LIGHTBOX
-    ----------------------------------------------------- */
-
-    function openGallery(index) {
-
-        if (
-            !galleryLightbox ||
-            !galleryItems.length
-        ) {
-
-            return;
+            lightboxTitle.textContent =
+                item.title;
 
         }
 
 
+        if (lightboxDescription) {
+
+            lightboxDescription.textContent =
+                item.description;
+
+        }
+
+
+        if (lightboxNumber) {
+
+            lightboxNumber.textContent =
+                `${String(currentGalleryIndex + 1).padStart(2,"0")} / ${String(galleryItems.length).padStart(2,"0")}`;
+
+        }
+
+    };
+
+
+    const openLightbox = index => {
+
+        if (!lightbox) return;
+
         currentGalleryIndex =
             index;
 
-
         updateLightbox();
 
+        lightbox.classList.add("open");
 
-        galleryLightbox.classList.add(
-            "open"
-        );
-
-
-        galleryLightbox.setAttribute(
+        lightbox.setAttribute(
             "aria-hidden",
             "false"
         );
-
 
         document.body.classList.add(
             "lightbox-open"
         );
 
-
         if (lightboxClose) {
-
             lightboxClose.focus();
-
         }
 
-    }
+    };
 
 
-    /* -----------------------------------------------------
-       CLOSE LIGHTBOX
-    ----------------------------------------------------- */
+    const closeLightbox = () => {
 
-    function closeGallery() {
+        if (!lightbox) return;
 
-        if (!galleryLightbox) return;
-
-
-        galleryLightbox.classList.remove(
+        lightbox.classList.remove(
             "open"
         );
 
-
-        galleryLightbox.setAttribute(
+        lightbox.setAttribute(
             "aria-hidden",
             "true"
         );
-
 
         document.body.classList.remove(
             "lightbox-open"
         );
 
-
-        if (lightboxImage) {
-
-            lightboxImage.style.opacity =
-                "0";
-
-        }
-
-    }
+    };
 
 
-    /* -----------------------------------------------------
-       PREVIOUS IMAGE
-    ----------------------------------------------------- */
-
-    function showPreviousGalleryImage() {
+    const showPrevious = () => {
 
         if (!galleryItems.length) return;
-
 
         currentGalleryIndex =
             (
@@ -888,20 +829,14 @@ document.addEventListener("DOMContentLoaded", () => {
             ) %
             galleryItems.length;
 
-
         updateLightbox();
 
-    }
+    };
 
 
-    /* -----------------------------------------------------
-       NEXT IMAGE
-    ----------------------------------------------------- */
-
-    function showNextGalleryImage() {
+    const showNext = () => {
 
         if (!galleryItems.length) return;
-
 
         currentGalleryIndex =
             (
@@ -910,15 +845,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ) %
             galleryItems.length;
 
-
         updateLightbox();
 
-    }
+    };
 
-
-    /* -----------------------------------------------------
-       GALLERY CARD EVENTS
-    ----------------------------------------------------- */
 
     galleryCards.forEach(
         (card, index) => {
@@ -927,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "click",
                 () => {
 
-                    openGallery(index);
+                    openLightbox(index);
 
                 }
             );
@@ -936,15 +866,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    /* -----------------------------------------------------
-       LIGHTBOX CONTROLS
-    ----------------------------------------------------- */
-
     if (lightboxClose) {
 
         lightboxClose.addEventListener(
             "click",
-            closeGallery
+            closeLightbox
         );
 
     }
@@ -954,7 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lightboxPrev.addEventListener(
             "click",
-            showPreviousGalleryImage
+            showPrevious
         );
 
     }
@@ -964,351 +890,156 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lightboxNext.addEventListener(
             "click",
-            showNextGalleryImage
+            showNext
         );
 
     }
 
 
-    /* -----------------------------------------------------
-       BACKDROP CLOSE
-    ----------------------------------------------------- */
+    if (lightboxBackdrop) {
 
-    if (galleryLightbox) {
-
-        const backdrop =
-            galleryLightbox.querySelector(
-                ".lightbox-backdrop"
-            );
-
-
-        if (backdrop) {
-
-            backdrop.addEventListener(
-                "click",
-                closeGallery
-            );
-
-        }
+        lightboxBackdrop.addEventListener(
+            "click",
+            closeLightbox
+        );
 
     }
 
 
-    /* -----------------------------------------------------
-       KEYBOARD CONTROLS
-    ----------------------------------------------------- */
+    /* =================================================
+       LIGHTBOX KEYBOARD CONTROLS
+    ================================================= */
 
     document.addEventListener(
         "keydown",
         event => {
 
             if (
-                !galleryLightbox ||
-                !galleryLightbox.classList.contains(
+                !lightbox ||
+                !lightbox.classList.contains(
                     "open"
                 )
             ) {
-
                 return;
-
             }
 
 
             if (event.key === "Escape") {
 
-                closeGallery();
+                closeLightbox();
 
             }
 
-
-            if (event.key === "ArrowLeft") {
-
-                showPreviousGalleryImage();
-
-            }
-
-
-            if (event.key === "ArrowRight") {
-
-                showNextGalleryImage();
-
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       ACTIVE NAVIGATION
-    ===================================================== */
-
-    const sections =
-        document.querySelectorAll(
-            "main section[id]"
-        );
-
-
-    const navLinks =
-        document.querySelectorAll(
-            ".desktop-nav a"
-        );
-
-
-    function updateActiveNavigation() {
-
-        if (
-            !sections.length ||
-            !navLinks.length
-        ) {
-
-            return;
-
-        }
-
-
-        let currentSection =
-            "home";
-
-
-        const scrollPosition =
-            window.scrollY + 180;
-
-
-        sections.forEach(section => {
 
             if (
-                scrollPosition >=
-                section.offsetTop
+                event.key === "ArrowLeft"
             ) {
 
-                currentSection =
-                    section.id;
+                showPrevious();
 
             }
 
-        });
 
+            if (
+                event.key === "ArrowRight"
+            ) {
 
-        navLinks.forEach(link => {
-
-            const href =
-                link.getAttribute("href");
-
-
-            const isActive =
-                href ===
-                `#${currentSection}`;
-
-
-            link.classList.toggle(
-                "active",
-                isActive
-            );
-
-
-            if (isActive) {
-
-                link.setAttribute(
-                    "aria-current",
-                    "page"
-                );
+                showNext();
 
             }
 
-            else {
-
-                link.removeAttribute(
-                    "aria-current"
-                );
-
-            }
-
-        });
-
-    }
-
-
-    window.addEventListener(
-        "scroll",
-        updateActiveNavigation,
-        { passive: true }
+        }
     );
 
 
-    window.addEventListener(
-        "resize",
-        updateActiveNavigation
-    );
+    /* =================================================
+       TOUCH / SWIPE FOR GALLERY
+    ================================================= */
+
+    let touchStartX = 0;
+    let touchEndX = 0;
 
 
-    updateActiveNavigation();
+    if (lightbox) {
 
+        lightbox.addEventListener(
+            "touchstart",
+            event => {
 
-    /* =====================================================
-       NAVBAR SHADOW
-    ===================================================== */
+                if (
+                    event.changedTouches.length
+                ) {
 
-    const navbar =
-        document.getElementById(
-            "navbar"
-        );
+                    touchStartX =
+                        event
+                            .changedTouches[0]
+                            .screenX;
 
-
-    function updateNavbar() {
-
-        if (!navbar) return;
-
-
-        const isScrolled =
-            window.scrollY > 20;
-
-
-        navbar.classList.toggle(
-            "scrolled",
-            isScrolled
-        );
-
-    }
-
-
-    window.addEventListener(
-        "scroll",
-        updateNavbar,
-        { passive: true }
-    );
-
-
-    updateNavbar();
-
-
-    /* =====================================================
-       REVEAL ANIMATION
-    ===================================================== */
-
-    const revealElements =
-        document.querySelectorAll(
-            ".section, .info-strip, .menu-card, .final-cta"
-        );
-
-
-    if (
-        "IntersectionObserver" in window
-    ) {
-
-        const revealObserver =
-            new IntersectionObserver(
-
-                entries => {
-
-                    entries.forEach(
-                        entry => {
-
-                            if (
-                                entry.isIntersecting
-                            ) {
-
-                                entry.target.classList.add(
-                                    "revealed"
-                                );
-
-
-                                revealObserver.unobserve(
-                                    entry.target
-                                );
-
-                            }
-
-                        }
-                    );
-
-                },
-
-                {
-                    threshold: 0.08
                 }
 
-            );
-
-
-        revealElements.forEach(
-            element => {
-
-                element.classList.add(
-                    "reveal"
-                );
-
-
-                revealObserver.observe(
-                    element
-                );
-
-            }
+            },
+            { passive: true }
         );
 
-    }
 
-    else {
+        lightbox.addEventListener(
+            "touchend",
+            event => {
 
-        revealElements.forEach(
-            element => {
+                if (
+                    event.changedTouches.length
+                ) {
 
-                element.classList.add(
-                    "revealed"
-                );
+                    touchEndX =
+                        event
+                            .changedTouches[0]
+                            .screenX;
 
-            }
+                    handleSwipe();
+
+                }
+
+            },
+            { passive: true }
         );
 
     }
 
 
-    /* =====================================================
-       CURRENT YEAR
-    ===================================================== */
+    const handleSwipe = () => {
 
-    const currentYear =
-        document.getElementById(
-            "currentYear"
-        );
+        const difference =
+            touchEndX -
+            touchStartX;
 
-
-    if (currentYear) {
-
-        currentYear.textContent =
-            new Date().getFullYear();
-
-    }
+        const minimumSwipe =
+            50;
 
 
-    /* =====================================================
-       IMAGE ERROR HANDLING
-    ===================================================== */
-
-    const images =
-        document.querySelectorAll(
-            "img"
-        );
+        if (
+            Math.abs(difference) <
+            minimumSwipe
+        ) {
+            return;
+        }
 
 
-    images.forEach(image => {
+        if (difference > 0) {
 
-        image.addEventListener(
-            "error",
-            () => {
+            showPrevious();
 
-                image.classList.add(
-                    "image-load-error"
-                );
+        } else {
 
-            }
-        );
+            showNext();
 
-    });
+        }
+
+    };
 
 
-    /* =====================================================
-       CAFÉ ATMOSPHERE VIDEO
-    ===================================================== */
+    /* =================================================
+       VIDEO
+    ================================================= */
 
     const atmosphereVideo =
         document.querySelector(
@@ -1318,52 +1049,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (atmosphereVideo) {
 
-        atmosphereVideo.muted = true;
+        atmosphereVideo
+            .play()
+            .catch(() => {
+                /* Browser may block autoplay. */
+            });
+
+    }
 
 
-        const playVideo =
-            () => {
+    /* =================================================
+       IMAGE ERROR HANDLING
+    ================================================= */
 
-                const playPromise =
-                    atmosphereVideo.play();
+    document
+        .querySelectorAll("img")
+        .forEach(image => {
 
+            image.addEventListener(
+                "error",
+                () => {
 
-                if (
-                    playPromise &&
-                    typeof playPromise.catch ===
-                    "function"
-                ) {
-
-                    playPromise.catch(
-                        () => {
-                            /* Autoplay may be blocked */
-                        }
+                    image.classList.add(
+                        "image-error"
                     );
 
                 }
+            );
 
-            };
+        });
 
-
-        playVideo();
-
-
-        document.addEventListener(
-            "visibilitychange",
-            () => {
-
-                if (
-                    document.visibilityState ===
-                    "visible"
-                ) {
-
-                    playVideo();
-
-                }
-
-            }
-        );
-
-    }
 
 });
